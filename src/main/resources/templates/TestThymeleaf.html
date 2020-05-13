@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"></meta>
+    <title>Hello</title>
+</head>
+<body>
+<h1 th:text="${message}">Hello World</h1>
+<p th:text="${message}+'我不'"></p>
+<p th:if="${message == 'blog'}">${message}</p>
+<p th:if="${message.indexOf('b')>-1}">${message.indexOf('b')}</p>
+<p>[[${message}]]</p>
+<p>for</p>
+<table>
+    <tr th:each="inx,stat:${list}">
+        <td th:text="${inx}"></td>
+        <td th:text="${stat.index}"></td>
+    </tr>
+<div th:replace="fragmet::divs(${name},${avg})"></div>
+
+</table>
+
+</body>
+</html>
