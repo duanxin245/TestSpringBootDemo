@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>LiteChat_Frame（轻聊天气泡框架）</title>
+  <link rel="stylesheet" type="text/css" href="/litewebchat.min.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+    <!-- 主容器 -->
+    <div class="lite-chatbox">
+
+    </div>
+
+       <!-- <div class="form-group" ></br>
+            <h5>聊天室</h5>
+            <textarea id="message_content" class="form-control" readonly="readonly" cols="50"
+                      rows="10"></textarea>
+        </div>-->
+
+    <div class="form-group" >
+        <label for="in_user_name">⽤户姓名 &nbsp;</label>
+        <input id="in_user_name" value="" class="form-control" /></br>
+        <button id="user_join" class="btn btn-success" >加⼊聊天室</button>
+        <button id="user_exit" class="btn btn-warning" >离开聊天室</button>
+    </div>
+    <div class="form-group" >
+        <label for="in_room_msg" >群发消息 &nbsp;</label>
+        <input id="in_room_msg" value="" class="form-control" /></br>
+        <button id="user_send_all" class="btn btn-info" >发送消息</button>
+    </div>
+</body>
+
+<script type="text/javascript">
+    var uid = "[[${uuid}]]";
+    $(document).ready(function(){
+
+        var urlPrefix ='ws://localhost:8080/webServer/[[${uuid}]]/';
+        var ws = null;
+        $('#user_join').click(function(){
+            var username = $('#in_user_name').val();
+            var url = urlPrefix + username;
+            ws = new WebSocket(url);
+            ws.onopen = function (event) {
+                console.log("建⽴ websocket 连接...");
+            };
+            ws.onmessage = function(event){
+                var jsons = JSON.parse(event.data.toString());
+                //服务端发送的消息
+                //$('#message_content').append("["+jsons.name+"]:"+jsons.message+'\n');
+                switch (jsons.type) {
+                    case "1":
+                        addTips(jsons.name,jsons.message);
+                        break;
+                    case "2":
+                        if(jsons.uuid==uid){
+                            addHtnlCright(jsons.name,jsons.message);
+                        }else{
+                            addHtnlCleft(jsons.name,jsons.message);
+                        }
+                        break;
+                    case "3":
+                        addTips(jsons.name,jsons.message);
+                        break;
+                }
+            };
+            ws.onclose = function(){
+                $('#message_content').append('⽤户['+username+'] 已经离开聊天室!');
+                console.log("关闭 websocket 连接...");
+            }
+        });
+        //客户端发送消息到服务器
+        $('#user_send_all').click(function(){
+            if(uid!=""){
+                var msg = $('#in_room_msg').val();
+                if(ws){
+                    ws.send(msg);
+                }
+            }
+        });
+        // 退出聊天室
+        $('#user_exit').click(function(){
+            if(ws){
+                ws.close();
+                uid = "";
+            }
+        });
+
+    })
+
+    //左侧
+    function addHtnlCleft(uname,umassage){
+        var htmls = "<div class=\"cleft cmsg\">\n" +
+            "        <img class=\"headIcon radius\" ondragstart=\"return false;\"  oncontextmenu=\"return false;\" src=\"/img/A.jpg\" />\n" +
+            "        <span class=\"name\">"+uname+"</span>\n" +
+            "        <span class=\"content\">"+umassage+"</span>\n" +
+            "    </div>";
+        $('.lite-chatbox').append(htmls);
+    }
+    //右侧
+    function addHtnlCright(uname,umassage){
+        var htmls = "<div class=\"cright cmsg\">\n" +
+            "        <img class=\"headIcon radius\" ondragstart=\"return false;\"  oncontextmenu=\"return false;\"  src=\"/img/B.jpg\" />\n" +
+            "        <span class=\"name\">"+uname+"</span>\n" +
+            "        <span class=\"content\">"+umassage+"</span>\n" +
+            "    </div>";
+        $('.lite-chatbox').append(htmls);
+    }
+    function addTips(uname,umassage){
+        var htmls ="<div class=\"tips\">\n" +
+            "        <span class=\"tips-warning\">"+uname+" "+umassage+"</span>\n" +
+            "    </div>";
+        $('.lite-chatbox').append(htmls);
+    }
+
+</script>
+</html>

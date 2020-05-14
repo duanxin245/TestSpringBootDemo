@@ -44,9 +44,4 @@ public class MyFilterController {
         return "redirect:/fileUpload";
     }
 
-    @RequestMapping("/exception")
-    public String getException(){
-        int i = 1/0;
-        return "redirect:/fileUpload";
-    }
 }
